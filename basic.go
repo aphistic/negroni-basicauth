@@ -1,13 +1,10 @@
 package basicauth
 
 import (
-	"net/http"
-
-	"strings"
-
 	"encoding/base64"
-
 	"fmt"
+	"net/http"
+	"strings"
 
 	"github.com/urfave/negroni"
 )

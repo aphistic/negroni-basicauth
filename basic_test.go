@@ -1,18 +1,23 @@
 package basicauth
 
 import (
-	"errors"
-	"testing"
-
-	"net/http"
-
 	"encoding/base64"
-
+	"errors"
 	"fmt"
+	"net/http"
+	"testing"
 
 	"github.com/aphistic/sweet"
 	. "github.com/onsi/gomega"
 )
+
+func TestMain(m *testing.M) {
+	RegisterFailHandler(sweet.GomegaFail)
+
+	sweet.Run(m, func(s *sweet.S) {
+		s.AddSuite(&BasicSuite{})
+	})
+}
 
 func newReq() *http.Request {
 	return &http.Request{
@@ -43,17 +48,9 @@ func (w *TestWriter) WriteHeader(statusCode int) {
 	w.LastStatus = statusCode
 }
 
-func Test(t *testing.T) {
-	sweet.SetUpAllTests(func(tt *testing.T) {
-		RegisterTestingT(tt)
-	})
-
-	sweet.RunSuite(t, &BasicSuite{})
-}
-
 type BasicSuite struct{}
 
-func (s *BasicSuite) TestGetCreds(t *testing.T) {
+func (s *BasicSuite) TestGetCreds(t sweet.T) {
 	u, p := getCreds(nil)
 	Expect(u).To(Equal(""))
 	Expect(p).To(Equal(""))
@@ -95,7 +92,7 @@ func (s *BasicSuite) TestGetCreds(t *testing.T) {
 	Expect(p).To(Equal("mypass"))
 }
 
-func (s *BasicSuite) TestBasicFuncInvalidAuth(t *testing.T) {
+func (s *BasicSuite) TestBasicFuncInvalidAuth(t sweet.T) {
 	f := BasicFunc("myrealm", func(user, pass string, req *http.Request) bool {
 		return false
 	})
@@ -115,7 +112,7 @@ func (s *BasicSuite) TestBasicFuncInvalidAuth(t *testing.T) {
 	Expect(nextCalled).To(BeFalse())
 }
 
-func (s *BasicSuite) TestBasicFuncValidAuth(t *testing.T) {
+func (s *BasicSuite) TestBasicFuncValidAuth(t sweet.T) {
 	foundUser := ""
 	foundPass := ""
 	var foundReq *http.Request
@@ -148,7 +145,7 @@ func (s *BasicSuite) TestBasicFuncValidAuth(t *testing.T) {
 	Expect(foundReq).To(BeIdenticalTo(req))
 }
 
-func (s *BasicSuite) TestBasicAuthInvalidAuth(t *testing.T) {
+func (s *BasicSuite) TestBasicAuthInvalidAuth(t sweet.T) {
 	f := BasicAuth("myrealm", map[string]string{
 		"myuser": "mypass",
 	})
@@ -171,7 +168,7 @@ func (s *BasicSuite) TestBasicAuthInvalidAuth(t *testing.T) {
 	Expect(nextCalled).To(BeFalse())
 }
 
-func (s *BasicSuite) TestBasicAuthValidAuth(t *testing.T) {
+func (s *BasicSuite) TestBasicAuthValidAuth(t sweet.T) {
 	f := BasicAuth("myrealm", map[string]string{
 		"myuser": "mypass",
 	})
